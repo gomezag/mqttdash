@@ -1,0 +1,83 @@
+{%extends 'navbar.html' %}
+
+{%block content%}
+
+<h4>Temp. In: <h4 id="temp"> {{data.T}} &deg;</h4></h4>
+<h4>Temp. Out: <h4 id="tempout"> {{data.TO}} &deg;</h4></h4>
+<h4>Hum. In: <h4 id="humi"> {{data.H}} &#37;</h4></h4>
+<h4>Hum. Out: <h4 id="humiout"> {{data.HO}} &#37;</h4></h4>
+<h4>Nano Battery: <h4 id="bate"> {{data.NB}} V</h4></h4>
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script>
+
+    const tempSocket = new WebSocket(
+        '{{ ws_url }}/ws/room/T/'
+    );
+    tempSocket.onclose = function(e) {
+        console.log(e)
+        console.error('Data socket closed unexpectedly');
+    };
+    tempSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        document.querySelector('#temp').innerHTML = data.message + '&deg;';
+    };
+
+
+    const humiSocket = new WebSocket(
+        '{{ ws_url }}'
+        + '/ws/room/H/'
+    );
+    humiSocket.onclose = function(e) {
+        console.log(e)
+        console.error('Data socket closed unexpectedly');
+    };
+    humiSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        document.querySelector('#humi').innerHTML = data.message + '&#37;';
+    };
+
+
+    const tempOutSocket = new WebSocket(
+        '{{ ws_url }}'
+        + '/ws/room/TO/'
+    );
+    tempOutSocket.onclose = function(e) {
+        console.log(e)
+        console.error('Data socket closed unexpectedly');
+    };
+    tempOutSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        document.querySelector('#tempout').innerHTML = data.message + '&deg;';
+    };
+
+
+    const humiOutSocket = new WebSocket(
+        '{{ ws_url }}'
+        + '/ws/room/HO/'
+    );
+    humiOutSocket.onclose = function(e) {
+        console.log(e)
+        console.error('Data socket closed unexpectedly');
+    };
+    humiOutSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        document.querySelector('#humiout').innerHTML = data.message + '&#37;';
+    };
+
+
+    const bateSocket = new WebSocket(
+        '{{ ws_url }}'
+        + '/ws/room/NB/'
+    );
+    bateSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        document.querySelector('#bate').innerHTML = data.message + '&#37;';
+    };
+    bateSocket.onclose = function(e) {
+        console.log(e)
+        console.error('Data socket closed unexpectedly');
+    };
+</script>
+
+{% endblock %}

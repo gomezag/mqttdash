@@ -1,0 +1,25 @@
+{%extends 'navbar.html' %}
+{%load plotly_dash%}
+
+{%block content%}
+
+<h4>Temperatura: <h4 id="temp"> No temp yet! &deg;</h4></h4>
+
+{%plotly_app name="panel" ratio=1%}
+
+<script>
+    const tempSocket = new WebSocket(
+        '{{ ws_url }}'
+        + '/ws/room/T/'
+    );
+
+    tempSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        document.querySelector('#temp').innerHTML = data.message + '&deg;';
+    };
+
+    tempSocket.onclose = function(e) {
+        console.error('Data socket closed unexpectedly');
+    };
+</script>
+{%endblock%}
