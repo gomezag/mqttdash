@@ -265,7 +265,7 @@ def callback_color(start_date, end_date, reload, session_state=None, dash_app_id
 
 @functools.lru_cache(maxsize=1024)
 def get_csv(start_date, end_date):
-    data = pandas.read_csv('/home/pi/agnas/mqtt.log')
+    data = pandas.read_csv(env('MQTT_LOG_FILE'))
     data.set_index('date')
     data = data[
         (data['date'] < end_date) &
