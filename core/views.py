@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 import environ
 from .models import *
+from .dash_apps import PlotDash
 env = environ.Env()
 # Create your views here.
 
@@ -9,7 +10,7 @@ env = environ.Env()
 def index(request, **kwargs):
     template_name = "dash1.html"
     session = request.session
-
+    PlotDash()
     demo_count = session.get('django_plotly_dash', {})
 
     ind_use = demo_count.get('ind_use', 0)
