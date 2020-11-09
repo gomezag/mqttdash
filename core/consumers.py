@@ -7,7 +7,7 @@ from .apps import set_light
 
 class DataConsumer(WebsocketConsumer):
     def connect(self):
-        self.loc_name = self.scope['url_route']['kwargs']['loc_group']
+        self.loc_name = self.scope['url_route']['kwargs']['loc_name']
         self.loc_group_name = 'livedata'
 
         # Join room group
