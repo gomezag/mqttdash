@@ -61,7 +61,7 @@ class DataConsumer(WebsocketConsumer):
 
         # Send message to WebSocket
         self.send(text_data=json.dumps({
-            'type': 'data_update',
+            'sensor': self.loc_name,
             'message': message
         }))
 
