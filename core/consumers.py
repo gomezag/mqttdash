@@ -33,7 +33,8 @@ class DataConsumer(WebsocketConsumer):
                 self.loc_group_name,
                 {
                     'type': 'data_update',
-                    'message': message
+                    'message': message,
+                    'sensor': self.loc_name,
                 })
 
     def data_update(self, event):
@@ -61,7 +62,7 @@ class DataConsumer(WebsocketConsumer):
 
         # Send message to WebSocket
         self.send(text_data=json.dumps({
-            'sensor': self.loc_name,
+            'sensor': event['sensor'],
             'message': message
         }))
 
