@@ -35,47 +35,32 @@ class DataConsumer(WebsocketConsumer):
                     'type': 'data_update',
                     'message': message
                 })
-        if type == 'command':
-            async_to_sync(self.channel_layer.group_send)(
-                self.loc_group_name,
-                {
-                    'type': 'command',
-                    'message': message
-                })
 
     def data_update(self, event):
         message = event['message']
         if self.loc_name == 'NB':
             message = "{:.2f}".format(float(message) * 10 * 950 / (1024 * 100))
 
-        try:
-            dato = Dato.objects.get(location=self.loc_name)
-            dato.valor = message
-            dato.save()
-        except Dato.DoesNotExist:
-            dato = Dato()
-            dato.location = self.loc_name
-            dato.valor = message
-            dato.save()
-        except Exception as e:
-            print(repr(e))
-
-        # Send message to WebSocket
-        self.send(text_data=json.dumps({
-            'type': 'data_update',
-            'message': message
-        }))
-
-    def command(self, event):
-        message = event['message']
-        if self.loc_name=="light":
+        if self.loc_name == "light":
             if message=='on':
                 set_light(True)
             elif message=='off':
                 set_light(False)
+        else:
+            try:
+                dato = Dato.objects.get(location=self.loc_name)
+                dato.valor = message
+                dato.save()
+            except Dato.DoesNotExist:
+                dato = Dato()
+                dato.location = self.loc_name
+                dato.valor = message
+                dato.save()
+            except Exception as e:
+                print(repr(e))
 
         # Send message to WebSocket
         self.send(text_data=json.dumps({
-            'type': 'command',
+            'type': 'data_update',
             'message': message
         }))
