@@ -2,6 +2,7 @@ import json
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 from .models import Dato
+from .apps import set_light
 
 
 class DataConsumer(WebsocketConsumer):
@@ -34,11 +35,19 @@ class DataConsumer(WebsocketConsumer):
                     'type': 'data_update',
                     'message': message
                 })
+        if type == 'command':
+            async_to_sync(self.channel_layer.group_send)(
+                self.loc_group_name,
+                {
+                    'type': 'command',
+                    'message': message
+                })
 
     def data_update(self, event):
         message = event['message']
         if self.loc_name == 'NB':
             message = "{:.2f}".format(float(message) * 10 * 950 / (1024 * 100))
+
         try:
             dato = Dato.objects.get(location=self.loc_name)
             dato.valor = message
@@ -54,5 +63,19 @@ class DataConsumer(WebsocketConsumer):
         # Send message to WebSocket
         self.send(text_data=json.dumps({
             'type': 'data_update',
+            'message': message
+        }))
+
+    def command(self, event):
+        message = event['message']
+        if self.loc_name=="light":
+            if message=='on':
+                set_light(True)
+            elif message=='off':
+                set_light(False)
+
+        # Send message to WebSocket
+        self.send(text_data=json.dumps({
+            'type': 'command',
             'message': message
         }))
