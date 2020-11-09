@@ -7,8 +7,8 @@ from .apps import set_light
 
 class DataConsumer(WebsocketConsumer):
     def connect(self):
-        self.loc_name = self.scope['url_route']['kwargs']['loc_name']
-        self.loc_group_name = 'livedata_%s' % self.loc_name
+        self.loc_name = self.scope['url_route']['kwargs']['loc_group']
+        self.loc_group_name = 'livedata'
 
         # Join room group
         async_to_sync(self.channel_layer.group_add)(
@@ -64,3 +64,34 @@ class DataConsumer(WebsocketConsumer):
             'type': 'data_update',
             'message': message
         }))
+
+
+class CommandConsumer(WebsocketConsumer):
+    def connect(self):
+        self.thing = self.scope['url_route']['kwargs']['thing']
+        self.thing_group_name = 'control_' % self.thing
+
+        # Join room group
+        async_to_sync(self.channel_layer.group_add)(
+            self.thing_group_name,
+            self.channel_name
+        )
+        self.accept()
+
+
+    def disconnect(self, close_code):
+        async_to_sync(self.channel_layer.group_discard)(
+            self.thing_group_name,
+            self.channel_name
+        )
+
+    def receive(self, text_data):
+        text_data_json = json.loads(text_data)
+        message = text_data_json['message']
+        type = text_data_json['type']
+        if type == 'command':
+            if message == 'on':
+                set_light(True)
+            elif message == 'off':
+                set_light(False)
+
