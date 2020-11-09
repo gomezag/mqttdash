@@ -29,7 +29,6 @@ application = ProtocolTypeRouter({
         "P2": consumers.DataConsumer,
         "P3": consumers.DataConsumer,
         "NB": consumers.DataConsumer,
-        "light": consumers.CommandConsumer,
     }),
 })
 

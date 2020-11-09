@@ -70,7 +70,7 @@ class DataConsumer(WebsocketConsumer):
 class CommandConsumer(WebsocketConsumer):
     def connect(self):
         self.thing = self.scope['url_route']['kwargs']['thing']
-        self.thing_group_name = 'control_' % self.thing
+        self.thing_group_name = 'control'
 
         # Join room group
         async_to_sync(self.channel_layer.group_add)(

@@ -152,7 +152,6 @@ class PlotDash():
                 ])
         ])
         
-        
         @app.callback(dash.dependencies.Output("loading-2", "children"))
         @app.expanded_callback(
             dash.dependencies.Output('timeseries', 'figure'),
@@ -167,17 +166,17 @@ class PlotDash():
                 session_state['app_state'] = csf
             else:
                 if csf['reload'] != reload:
-                    get_csv.cache_clear()
-        
+                    reload = True
+                else:
+                    reload = False
+
             if not end_date or not start_date:
                 end_date = (datetime.datetime.now() + datetime.timedelta(days=1)).strftime('%Y-%m-%d')
                 start_date = (datetime.datetime.now() - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
         
             if not end_date or not start_date:
                 return None
-            print(start_date, end_date)
-        
-            data = get_csv(start_date, end_date)
+            data = get_data(start_date, end_date, reload)
             fig = go.Figure()
             traces = [go.Scatter(y=data[(data['loc'] == 'T')]['value'],
                                  x=data[(data['loc'] == 'T')]['date'],
@@ -266,11 +265,27 @@ class PlotDash():
         
 
 @functools.lru_cache(maxsize=1024)
-def get_csv(start_date, end_date):
-    data = pandas.read_csv(env('MQTT_LOG_FILE'))
+def get_csv():
+    data = pandas.read_csv(env('MQTT_LOG_FILE'), chunksize=1024)
     data.set_index('date')
-    data = data[
-        (data['date'] < end_date) &
-        (data['date'] > start_date)
-        ]
+    return data
+
+
+def get_data(start_date, end_date, reload):
+    # if reload:
+    #     get_csv.cache_clear()
+    # data = get_csv()
+    # data = data[
+    #     (data['date'] < end_date) &
+    #     (data['date'] > start_date)
+    #     ]
+
+    data = pandas.DataFrame()
+    for chunk in pandas.read_csv(env('MQTT_LOG_FILE'), chunksize=50000):
+        data = data.append(
+            chunk[(chunk['date'] > start_date) &
+                  (chunk['date'] < end_date)
+            ]
+        )
+
     return data
