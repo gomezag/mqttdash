@@ -97,4 +97,17 @@ class CommandConsumer(WebsocketConsumer):
                     set_light(True)
                 elif message == 'off':
                     set_light(False)
-
+        async_to_sync(self.channel_layer.group_send)(
+            self.thing_group_name,
+            {
+                'type': 'data_update',
+                'command': message,
+                'thing': self.thing,
+            })
+    def data_update(self, event):
+        message = event['command']
+        # Send message to WebSocket
+        self.send(text_data=json.dumps({
+            'sensor': event['thing'],
+            'message': message
+        }))
