@@ -42,23 +42,17 @@ class DataConsumer(WebsocketConsumer):
         if self.loc_name == 'NB':
             message = "{:.2f}".format(float(message) * 10 * 950 / (1024 * 100))
 
-        if self.loc_name == "light":
-            if message=='on':
-                set_light(True)
-            elif message=='off':
-                set_light(False)
-        else:
-            try:
-                dato = Dato.objects.get(location=self.loc_name)
-                dato.valor = message
-                dato.save()
-            except Dato.DoesNotExist:
-                dato = Dato()
-                dato.location = self.loc_name
-                dato.valor = message
-                dato.save()
-            except Exception as e:
-                print(repr(e))
+        try:
+            dato = Dato.objects.get(location=self.loc_name)
+            dato.valor = message
+            dato.save()
+        except Dato.DoesNotExist:
+            dato = Dato()
+            dato.location = self.loc_name
+            dato.valor = message
+            dato.save()
+        except Exception as e:
+            print(repr(e))
 
         # Send message to WebSocket
         self.send(text_data=json.dumps({
@@ -87,15 +81,20 @@ class CommandConsumer(WebsocketConsumer):
         )
 
     def receive(self, text_data):
+        print('received message')
         text_data_json = json.loads(text_data)
         message = text_data_json['message']
         type = text_data_json['type']
         apikey = text_data_json['apikey']
         if apikey != '6c6cb21d-218e-4f80-8c0b-715547bdcbe4':
             return
+        print('apikey ok')
         if type == 'command':
-            if message == 'on':
-                set_light(True)
-            elif message == 'off':
-                set_light(False)
+            print('type ok')
+            if self.thing == 'light':
+                print('touching lights!')
+                if message == 'on':
+                    set_light(True)
+                elif message == 'off':
+                    set_light(False)
 
