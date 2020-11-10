@@ -90,6 +90,9 @@ class CommandConsumer(WebsocketConsumer):
         text_data_json = json.loads(text_data)
         message = text_data_json['message']
         type = text_data_json['type']
+        apikey = text_data_json['apikey']
+        if apikey != '6c6cb21d-218e-4f80-8c0b-715547bdcbe4':
+            return
         if type == 'command':
             if message == 'on':
                 set_light(True)
