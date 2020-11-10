@@ -82,22 +82,26 @@ class CommandConsumer(WebsocketConsumer):
 
     def receive(self, text_data):
         print('received message')
-        text_data_json = json.loads(text_data)
-        message = text_data_json['message']
-        type = text_data_json['type']
-        apikey = text_data_json['apikey']
+        try:
+            text_data_json = json.loads(text_data)
+            message = text_data_json['message']
+            type = text_data_json['type']
+            apikey = text_data_json['apikey']
+            thing = text_data_json['thing']
+        except Exception as e:
+            return
         if apikey != '6c6cb21d-218e-4f80-8c0b-715547bdcbe4':
             return
         print('apikey ok')
         if type == 'command':
             print('type ok')
-            if self.thing == 'light':
+            if thing == 'light':
                 print('touching lights!')
                 if message == 'on':
                     set_light(True)
                 elif message == 'off':
                     set_light(False)
-            elif self.thing == 'persiana':
+            elif thing == 'persiana':
                 if message == 'up':
                     persiana('up')
                 elif message == 'stop':
@@ -110,7 +114,7 @@ class CommandConsumer(WebsocketConsumer):
             {
                 'type': 'data_update',
                 'command': message,
-                'thing': self.thing,
+                'thing': thing,
             })
 
     def data_update(self, event):
