@@ -2,7 +2,7 @@ import json
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 from .models import Dato
-from .apps import set_light
+from .apps import set_light, persiana
 
 
 class DataConsumer(WebsocketConsumer):
@@ -97,6 +97,14 @@ class CommandConsumer(WebsocketConsumer):
                     set_light(True)
                 elif message == 'off':
                     set_light(False)
+            elif self.thing == 'persiana':
+                if message == 'up':
+                    persiana('up')
+                elif message == 'stop':
+                    persiana('stop')
+                elif message == 'down':
+                    persiana('down')
+
         async_to_sync(self.channel_layer.group_send)(
             self.thing_group_name,
             {
@@ -104,6 +112,7 @@ class CommandConsumer(WebsocketConsumer):
                 'command': message,
                 'thing': self.thing,
             })
+
     def data_update(self, event):
         message = event['command']
         # Send message to WebSocket
