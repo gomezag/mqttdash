@@ -65,9 +65,15 @@ class CommandConsumer(WebsocketConsumer):
     def connect(self):
         self.thing = self.scope['url_route']['kwargs']['thing']
         self.thing_group_name = 'control'
-        origin = self.scope['headers']['Origin']
-        con = Connection(origin=origin)
-        con.save()
+        try:
+            headers = dict(self.scope['headers'])
+            try:
+                con = Connection(origin=headers[b'x-real-ip'])
+            except KeyError:
+                con = Connection(origin=headers[b'host'])
+            con.save()
+        except Exception as e:
+            raise Exception('what '+repr(e) + str(headers))
         # Join room group
         async_to_sync(self.channel_layer.group_add)(
             self.thing_group_name,
@@ -90,10 +96,10 @@ class CommandConsumer(WebsocketConsumer):
             type = text_data_json['type']
             apikey = text_data_json['apikey']
             thing = text_data_json['thing']
+            if apikey != '6c6cb21d-218e-4f80-8c0b-715547bdcbe4':
+                return
         except Exception as e:
-            return
-        if apikey != '6c6cb21d-218e-4f80-8c0b-715547bdcbe4':
-            return
+            raise Exception(repr(e))
         print('apikey ok')
         if type == 'command':
             print('type ok')

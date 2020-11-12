@@ -21,4 +21,4 @@ class Connection(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.timestamp + ': '+self.origin
+        return self.timestamp.strftime('%Y-%m-%d %H:%M: ') +self.origin
