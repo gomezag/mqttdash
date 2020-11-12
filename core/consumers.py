@@ -1,7 +1,7 @@
 import json
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
-from .models import Dato
+from .models import Dato, Connection
 from .apps import set_light, persiana
 
 
@@ -65,7 +65,9 @@ class CommandConsumer(WebsocketConsumer):
     def connect(self):
         self.thing = self.scope['url_route']['kwargs']['thing']
         self.thing_group_name = 'control'
-
+        origin = self.scope['headers']['Origin']
+        con = Connection(origin=origin)
+        con.save()
         # Join room group
         async_to_sync(self.channel_layer.group_add)(
             self.thing_group_name,
