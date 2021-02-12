@@ -8,7 +8,7 @@ cffi==1.14.0
 channels==2.4.0
 click==7.1.1
 constantly==15.1.0
-cryptography==2.9.2
+cryptography==3.2
 Cython==0.29.16
 daphne==2.5.0
 dash==1.10.0
